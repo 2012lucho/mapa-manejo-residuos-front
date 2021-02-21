@@ -10,7 +10,7 @@
           "style": "sass"
         },
         "@schematics/angular:application": {
-          "strict": true
+          "strict": false
         }
       },
       "root": "",
@@ -31,6 +31,7 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/font-awesome/css/font-awesome.css",
               "src/styles.sass"
             ],
             "scripts": [
@@ -95,6 +96,7 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/font-awesome/css/font-awesome.css",
               "src/styles.sass"
             ],
             "scripts": [

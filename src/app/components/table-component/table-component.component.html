@@ -1,0 +1,183 @@
+<div class="row  align-items-center mb-2" *ngIf="componentEnabled">
+  <div class="col-auto">
+    <button type="" class="btn btn-primary" (click)="create()" *ngIf="config.actionOptions.new">Nuevo Envío</button>
+    <button type="" class="btn btn-primary" (click)="showFiltersFields()">Campos</button>
+    <button type="" class="btn btn-primary" (click)="showFiltersFieldC()" *ngIf="config.filterContentOptions.length > 0">Filtros</button>
+    <button type="" class="btn btn-primary" (click)="showResaltado()" *ngIf="config.resaltadoEnabled">Resaltado</button>
+  </div>
+
+  <div class="col"></div>
+</div>
+
+<div class="row" *ngIf="componentEnabled">
+  <div class="col" *ngIf="!filtersCollapsed">
+
+      <div class="row pl-3">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 " *ngFor="let field of config.filterFieldOptions;  let i = index">
+          <input class="form-check-input" type="checkbox"
+                  [(ngModel)]="config.filterFieldOptions[ i ].enabled"
+                  (click)="filterOptionClick( i )">
+          <label class="form-check-label" for="inlineCheckbox1" >{{ field.text }}</label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col" *ngIf="!resaltadoCollapsed">
+      <div class="row pl-3">
+        <div class="col">
+          <input class="form-check-input" type="checkbox"
+                  [(ngModel)]="config.resaltado[ 0 ].enabled" >
+          <label class="form-check-label" for="inlineCheckbox1" >Estado de envío</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col" *ngIf="!filterFieldContentCollapsed">
+      <div class="row pl-3">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+          <div class="form-group" >
+              <label for="sucursal-origen"> Campo a Filtrar </label>
+              <select class="form-control" id=""
+                      (change) = "filterFieldSelecChange()"
+                      [(ngModel)]="filterFieldContent.fieldSelec" >
+                  <option *ngFor="let cf of config.filterContentOptions" [value]="cf.field">{{ cf.controlConfig.label }}</option>
+              </select>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3" *ngIf="filterFieldContentStep >= 1">
+          <div class="form-group" >
+              <label for="sucursal-origen"> Filtro a Aplicar </label>
+              <select class="form-control" id=""
+                      (change) = "filterFieldSelecCriteriaChange()"
+                      [(ngModel)]="filterFieldContent.criteriaSelected" >
+                  <option *ngFor="let cf of filterFieldContent.criteriaOptions" [value]="cf.id">{{ cf.description }}</option>
+              </select>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3" *ngIf="filterFieldContentStep >= 2">
+          <div class="form-group" >
+              <label *ngIf="filterFieldContent.criteriaSelected != 'between'"> {{ filterFieldContent.controlConfig.label }} </label>
+              <select class="form-control" id="" *ngIf="filterFieldContent.controlConfig.type == 'select'"
+                      [(ngModel)]="filterFieldContent.params[0]" >
+                  <option *ngFor="let cf of filterFieldDataForFilter[ filterFieldContent.fieldSelec ].data" [value]="cf.id">{{ cf.description }}</option>
+              </select>
+
+              <label *ngIf="filterFieldContent.criteriaSelected == 'between'"> {{ filterFieldContent.controlConfig.label }} desde </label>
+              <div class="input-group" *ngIf="filterFieldContent.controlConfig.type == 'date'">
+                <input class="form-control"  name="dp1"
+                       ngbDatepicker #d="ngbDatepicker" [readonly]="true"
+                       [(ngModel)]     = "filterFieldContent.params[0]"  />
+                <div class="input-group-append">
+                  <button class="btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                    <i class="far fa-calendar"></i>
+                  </button>
+                </div>
+              </div>
+
+              <input type="number" class="form-control" id="" *ngIf="filterFieldContent.controlConfig.type == 'number'"
+                      [(ngModel)]="filterFieldContent.params[0]"  />
+
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3" *ngIf="filterFieldContentStep >= 2 && filterFieldContent.criteriaSelected == 'between'">
+            <div class="form-group">
+              <label *ngIf="filterFieldContent.criteriaSelected == 'between'"> {{ filterFieldContent.controlConfig.label }} hasta </label>
+              <div class="input-group" *ngIf="filterFieldContent.controlConfig.type == 'date'">
+                <input class="form-control"  name="dp2"
+                       ngbDatepicker #e="ngbDatepicker" [readonly]="true"
+                       [(ngModel)]     = "filterFieldContent.params[1]" />
+                <div class="input-group-append">
+                  <button class="btn-outline-secondary calendar" (click)="e.toggle()" type="button">
+                    <i class="far fa-calendar"></i>
+                  </button>
+                </div>
+              </div>
+
+              <input type="number" class="form-control" id="" *ngIf="filterFieldContent.controlConfig.type == 'number'"
+                      [(ngModel)]="filterFieldContent.params[1]"  />
+            </div>
+        </div>
+
+      </div>
+
+      <div class="row mt-3">
+        <div class="col">
+          <button type="submit" class="btn btn-primary mb-2" (click)="applyFilter()">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+<div class="row" *ngIf="componentEnabled">
+  <div class="col">
+    <div class="table-responsive">
+
+      <table class="table">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col-auto" class="text-center align-middle" *ngIf="config.regSelect">
+              <input class="" type="checkbox" *ngIf="shippings.length > 0"
+                      [(ngModel)]="checkBoxGralInfo[ actualPage ].checked" (change)="checkAllClick()"  >
+            </th>
+            <th *ngFor="let field of config.EnabledFilterFieldOptions;" scope="col" class="text-center align-middle">{{ config.filterFieldOptions[ field ].text }}</th>
+            <th scope="col" class="text-center align-middle" *ngIf="config.actionsEnabled">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cf of shippings; let i = index" [style.background-color]="getBackgrounColor( cf.status_id )">
+            <th scope="col" class="text-center align-middle" *ngIf="config.regSelect">
+              <input class="" type="checkbox" (change)="checkBoxRegChange()"
+                      [(ngModel)]="checkBoxArray[ cf.id ]"  >
+            </th>
+
+            <td *ngFor="let field of config.EnabledFilterFieldOptions;" scope="col" class="text-center align-middle">{{ cf[ config.filterFieldOptions[ field ].code ] }}</td>
+
+            <td class="text-center align-middle" *ngIf="config.actionsEnabled">
+              <button type="button" class="btn btn-info" (click)="edit( cf.id )" *ngIf="config.actionOptions.edit">    <i class="fas fa-pencil-alt"></i> </button>
+            </td>
+          </tr>
+
+          <tr class="text-center align-middle" *ngIf="shippings.length == 0">
+            <td class="text-center align-middle" colspan="20"> No se obtuvieron resultados.</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
+<!-- PAGINADOR INICIO -->
+<nav aria-label="Page navigation example" *ngIf="componentEnabled">
+  <div class="row">
+    <div class="col-12 col-md-auto">
+      <ul id="appPaginador" class="pagination">
+        <li class="page-item" [ngClass]="{disabled: actualPage == 1 }">
+          <a class="page-link" (click)="loadPage( actualPage-1 )" tabindex="-1">Anterior</a>
+        </li>
+        <li class="page-item" *ngFor="let cf of pageLinks;" [ngClass]="{active: actualPage == cf.page }">
+          <a class="page-link" (click)="loadPage( cf.page )">{{ cf.page }}</a>
+        </li>
+        <li class="page-item" [ngClass]="{disabled: ( actualPage + 1 ) > pageCount }">
+          <a class="page-link" (click)="loadPage( actualPage+1 )" >Siguiente</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-12 col-md-auto">
+      <form class="form-inline">
+        <div class="form-group mx-sm-3 mb-2">
+          <label for="inputPassword2" class="sr-only">Página actual</label>
+          <input type="number" class="form-control" id="inputPassword2" placeholder="1" [(ngModel)]="pageSelectInput" >
+        </div>
+        <button type="submit" class="btn btn-primary mb-2" (click)="appPaginadorGoTo (pageSelectInput )">Ir a página {{pageSelectInput}}</button>
+      </form>
+    </div>
+  </div>
+</nav>
+<!-- PAGINADOR FINAL -->
