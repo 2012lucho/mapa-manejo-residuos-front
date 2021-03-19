@@ -1,1 +1,54 @@
+<div class="row">
+  <div class="col">
 
+    <table class="table table-bordered">
+
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Dirección</th>
+            <th scope="col">Contenedor</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Lun</th>
+            <th scope="col">Mar</th>
+            <th scope="col">Mie</th>
+            <th scope="col">Jue</th>
+            <th scope="col">Vie</th>
+            <th scope="col">Sab</th>
+            <th scope="col">Dom</th>
+            <th scope="col">Total</th>
+            <th scope="col">Map</th>
+            <th scope="col">Graf</th>
+          </tr>
+          <tr>
+            <th colspan="3" scope="col"></th>
+            <th scope="col">Total</th>
+            <th scope="col">73%</th>
+            <th scope="col">76%</th>
+            <th scope="col">74%</th>
+            <th scope="col">81%</th>
+            <th scope="col">79%</th>
+            <th scope="col">60%</th>
+            <th scope="col">41%</th>
+            <th scope="col">75%</th>
+            <th colspan="2" scope="col"></th>
+          </tr>
+        </thead>
+
+        <tbody *ngFor="let reg of tableConfig.tableData.items" [style.background-color]="getRowBgColor( reg.id ) ">
+          <tr *ngFor="let subReg of reg.byns; let i = index">
+            <th scope="row" rowspan="4" *ngIf="i == 0">{{reg.id}}</th>
+            <td rowspan="4" *ngIf="i == 0">{{reg.address}}</td>
+            <td>{{subReg.id}}</td>
+            <td class="text-uppercase">{{subReg.typeString}}</td>
+            <td *ngFor="let fillL of subReg.fillLevel"><span *ngIf="fillL != 0">{{fillL}}%</span></td>
+            <td>85%</td>
+            <td class="text-center" (click)="goToMarker( reg )"><i class="btn-table fa fa-map-marker"></i></td>
+            <td class="text-center"><i class="btn-table fa fa-signal"></i></td>
+          </tr>
+        </tbody>
+
+    </table>
+
+  </div>
+</div>

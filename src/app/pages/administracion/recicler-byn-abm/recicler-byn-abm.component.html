@@ -1,0 +1,11 @@
+<div class="row" *ngIf="!showForm">
+  <div class="col">
+      <app-table-component [config]="tableConfig"></app-table-component>
+  </div>
+</div>
+
+<div class="row" *ngIf="showForm">
+  <div class="col">
+    <app-bootstrap-form *ngIf="showForm" [config]="formConfig"></app-bootstrap-form>
+  </div>
+</div>

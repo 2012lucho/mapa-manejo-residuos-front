@@ -3,10 +3,50 @@
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap'
 
+$table-border-color: #aaa
+
 .pg-content-gral, .container-fluid
-  background-color: #0a234d
+  background-color: #fff
 
 .pg-content-gral
-  height: 100vh
-  color: #fff
+  color: #000
   padding-top: 1em
+
+.table
+  font-size: 0.65em
+
+  thead
+    background: #41cbc5
+    color: #000
+
+  tbody
+    color: #000
+
+  th, td, tr
+    padding: 0.5em
+
+
+.table-bordered
+  border-color: $table-border-color !important
+
+  tbody, th, td, tr
+    border-color: $table-border-color !important
+
+.btn-table
+  cursor: pointer
+
+
+.btn
+    border-radius: 0px
+
+
+.form-title-cont
+    .title
+        border-bottom: 1px solid #fff
+
+.container-fluid
+    height: 100vh
+
+.nav-link, .dropdown-menu .dropdown-item
+    cursor: pointer
+    user-select: none

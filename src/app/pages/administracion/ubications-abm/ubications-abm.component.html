@@ -1,0 +1,11 @@
+<div class="row" *ngIf="!showUbicationForm">
+  <div class="col">
+      <app-table-component [config]="tableConfig"></app-table-component>
+  </div>
+</div>
+
+<div class="row" *ngIf="showUbicationForm">
+  <div class="col">
+    <app-ubications-form></app-ubications-form>
+  </div>
+</div>

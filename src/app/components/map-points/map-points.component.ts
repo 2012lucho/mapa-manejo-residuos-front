@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, NgZone } from '@angular/core';
 
 import {MapInfoWindow, MapMarker} from '@angular/google-maps';
+
 import { MapPoint } from './model/map-point';
+import { MapPointConfig } from './model/map.points.config';
 
 @Component({
   selector: 'app-map-points',
@@ -10,59 +12,92 @@ import { MapPoint } from './model/map-point';
 })
 export class MapPointsComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    private zone: NgZone
+  ) { }
 
   public center:any  = { lat: -33.050721, lng: -71.602699 };
   public zoom:number = 15;
   display?: google.maps.LatLngLiteral;
 
-  public points:MapPoint[] = [];
+  @Input() points:MapPoint[] = [];
+  @Input() config:MapPointConfig = new MapPointConfig();
+
+  public map:any=null;
+
+  private updateMarkersSubs:any = null;
+  private markers:google.maps.Marker[] = [];
+
+  private mapGoToPointSubs:any = null;
 
   ngOnInit(): void {
+    const map = new google.maps.Map(
+      document.getElementById("map") as HTMLElement,
+      {
+        zoom: this.zoom,
+        center: this.center,
+      }
+    );
+    this.map = map;
 
-    this.points.push( new MapPoint(
-      { lat: -33.050421, lng: -71.601699 },
-      { draggable: false },
-      { url:'./assets/cont2.png', scaledSize: { width:25, height:25 } }
-    ) );
+    //subscripción a actualización de mapa
+    this.updateMarkersSubs = this.config.updateMarkers.subscribe({  next: ( params: any ) => {
+        this.updateMarkers( map );
+    } });
 
-    this.points.push( new MapPoint(
-        { lat: -33.058421, lng: -71.602699 },
-        { draggable: false },
-        { url:'./assets/cont3.png', scaledSize: { width:25, height:25 } }
-    ) );
+    //subscripción para posicionar el centro del mapa en el punto especificado
+    this.mapGoToPointSubs = this.config.mapGoToPoint.subscribe({  next: ( params: any ) => {
+        this.goToPoint( params );
+    } });
 
-    this.points.push( new MapPoint(
-        { lat: -33.052421, lng: -71.608699 },
-        { draggable: false },
-        { url:'./assets/cont4.png', scaledSize: { width:25, height:25 } }
-    ) );
+    this.config.updateMarkers.next( true );
+  }
 
-    this.points.push( new MapPoint(
-        { lat: -33.057421, lng: -71.604699 },
-        { draggable: false },
-        { url:'./assets/cont1.png', scaledSize: { width:25, height:25 } }
-    ) );
+  goToPoint( params:any ){
+    this.map.setCenter( params.cc );
+    for ( let c=0; c < this.markers.length; c++ ){
+      if (this.markers[ c ].getLabel() == params.id ){
+        this.markers[ c ].setIcon( './assets/circle2.png' );
+      } else {
+        this.markers[ c ].setIcon( './assets/circle1.png' );
+      }
+    }
+  }
 
-    this.points.push( new MapPoint(
-        { lat: -33.050621, lng: -71.603699 },
-        { draggable: false },
-        { url:'./assets/cont2.png', scaledSize: { width:25, height:25 } }
-    ) );
+  updateMarkers( map:google.maps.Map ){
+    this.resetMarkers();
+    for ( let c=0; c < this.points.length; c++ ){
+      let marker = new google.maps.Marker({
+        position: this.points[ c ].markerPosition,
+        map,
+        label: this.points[ c ].markerOption.label,
+        draggable:  this.points[ c ].markerOption.draggable,
+        icon: this.points[ c ].markerOption.icon
+      });
 
-    this.points.push( new MapPoint(
-        { lat: -33.050321, lng: -71.607699 },
-        { draggable: false },
-        { url:'./assets/cont2.png', scaledSize: { width:25, height:25 } }
-    ) );
-
-    this.points.push( new MapPoint(
-        { lat: -33.058421, lng: -71.601699 },
-        { draggable: false },
-        { url:'./assets/cont3.png', scaledSize: { width:25, height:25 } }
-    ) );
+      marker.addListener("click", () => {
+        this.markerClickEvnt( this.points[ c ] );
+      });
 
 
+      this.markers.push( marker );
+    }
+  }
+
+  resetMarkers(){
+    for ( let c=0; c < this.markers.length; c++ ){
+      this.markers[ c ].setMap( null );
+    }
+  }
+
+  markerClickEvnt( point:any ){
+    this.config.mapPointClick.next( point );
+    this.goToPoint( { id: point.markerOption.label } );
+  }
+
+  ngOnDestroy(){
+    this.updateMarkersSubs.unsubscribe();
+    this.mapGoToPointSubs.unsubscribe();
   }
 
 }

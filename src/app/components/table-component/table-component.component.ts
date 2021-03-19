@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Subject }           from 'rxjs';
 
-import { GeneralService }     from '../../services/general.service';
+import { AppUIUtilsService }     from '../../services/app.ui.utils.service';
 import { FormateoService }    from '../../services/formateo.service';
 import { AuthService }        from '../../services/auth/auth.service';
 
@@ -17,8 +17,8 @@ export class TableComponentComponent implements OnInit {
   @Input() config:any;
   @Input() output:OutputTableModel = new OutputTableModel();
 
-  private ShippingGetAOK:Subject<any>     = new Subject();
-  private ShippingGetAKO:Subject<any>     = new Subject();
+  private getAllOK:Subject<any>     = new Subject();
+  private getAllKO:Subject<any>     = new Subject();
   private updateTableSubject:Subject<any> = new Subject();
 
   public shippings:any = [];
@@ -54,7 +54,7 @@ export class TableComponentComponent implements OnInit {
   public  componentEnabled:boolean = true;
 
   constructor(
-    public gral:    GeneralService,
+    public gral:    AppUIUtilsService,
     public format:  FormateoService,
     public auth:    AuthService
   ) { }
@@ -98,99 +98,75 @@ export class TableComponentComponent implements OnInit {
     }
 
     if ( !this.config.resaltadoEnabled ){
-      this.config.resaltado[ 0 ].enabled = false;
+      if ( this.config.resaltado.length > 0 ){
+        this.config.resaltado[ 0 ].enabled = false;
+      }
     }
 
-    this.ShippingGetAOK = this.config.provider.ShippingGetAOK.subscribe({  next: ( response : any ) => {
-      this.shippings = [];
+    if ( this.config.provider != null ){
+      this.getAllOK = this.config.provider.getAllOK.subscribe({  next: ( response : any ) => {
+        this.shippings = [];
 
-      for ( let c=0; c < response.items.length; c ++ ){
-         let reg:any = {
-          receiver_identification_type: response.items[ c ].receiver_identification.identification_type.name,
-          sender_identification_type:   response.items[ c ].sender_identification.identification_type.name,
-          originBranchOffice:           '-',
-          destinationBranchOffice:      response.items[ c ].destinationBranchOffice.name,
-          status_id:                    response.items[ c ].status.id,
-          status:                       response.items[ c ].status.label,
-          serviceType:                  response.items[ c ].serviceType.description,
-          sender_identification:        response.items[ c ].sender_identification.value,
-          receiver_identification:      response.items[ c ].receiver_identification.value,
-          price:                        this.format.getLocaleMoneyF( response.items[ c ].price ),
-          date:                         this.format.getSDateFromTimeStamp( response.items[ c ].date ),
-          payment_at_origin:            this.format.getTextOfBoolean( response.items[ c ].payment_at_origin ),
-          vehicle:                      '',
-          origin_full_name:             response.items[ c ].origin_full_name,
-          origin_contact:               response.items[ c ].origin_contact,
-          destination_full_name:        response.items[ c ].destination_full_name,
-          destination_contact:          response.items[ c ].destination_contact,
-          origin_address:               response.items[ c ].origin_address,
-          destination_address:          response.items[ c ].destination_address,
-          id:                           response.items[ c ].id
-        };
+        for ( let c=0; c < response.items.length; c ++ ){
+          let reg:any =  response.items[ c ];
 
-        if ( response.items[ c ].originBranchOffice != null ) {
-          reg.originBranchOffice = response.items[ c ].originBranchOffice.name;
+          this.shippings.push( reg );
+
+          // si la clave ya existe no se sobreescribe su valor
+          if ( !this.checkBoxArray.hasOwnProperty( String( response.items[ c ].id ) ) && this.actualPage != 0 ){
+            this.checkBoxArray[ String( response.items[ c ].id ) ] = this.checkBoxGralInfo[ this.actualPage ].checked;
+          }
+
+          if ( this.actualPage == 0 ){
+            this.actualPage = 1;
+          }
         }
 
-        this.shippings.push( reg );
+        this.totalRegs = response._meta.totalCount;
+        this.pageCount = response._meta.pageCount;
 
-        if ( response.items[ c ].vehicle != null ){
-          this.shippings[ c ].vehicle = response.items[ c ].vehicle.description;
+        this.pageLinks = [];
+
+        let page_initial:number = 1;
+        let page_final:number   = this.pageCount;
+        let page_i_v:number     = 0;
+
+        if ( this.actualPage > this.CANT_PAG_BKNX ){
+            page_initial = this.actualPage - this.CANT_PAG_BKNX;
+        } else {
+            page_i_v = this.CANT_PAG_BKNX - this.actualPage;
         }
 
-        // si la clave ya existe no se sobreescribe su valor
-        if ( !this.checkBoxArray.hasOwnProperty( String( response.items[ c ].id ) ) && this.actualPage != 0 ){
-          this.checkBoxArray[ String( response.items[ c ].id ) ] = this.checkBoxGralInfo[ this.actualPage ].checked;
+        if ( !( ( this.actualPage + this.CANT_PAG_BKNX + page_i_v ) > this.pageCount) ){
+            page_final = this.actualPage + this.CANT_PAG_BKNX + page_i_v;
         }
 
-        if ( this.actualPage == 0 ){
-          this.actualPage = 1;
-        }
-      }
-
-      this.totalRegs = response._meta.totalCount;
-      this.pageCount = response._meta.pageCount;
-
-      this.pageLinks = [];
-
-      let page_initial:number = 1;
-      let page_final:number   = this.pageCount;
-      let page_i_v:number     = 0;
-
-      if ( this.actualPage > this.CANT_PAG_BKNX ){
-          page_initial = this.actualPage - this.CANT_PAG_BKNX;
-      } else {
-          page_i_v = this.CANT_PAG_BKNX - this.actualPage;
-      }
-
-      if ( !( ( this.actualPage + this.CANT_PAG_BKNX + page_i_v ) > this.pageCount) ){
-          page_final = this.actualPage + this.CANT_PAG_BKNX + page_i_v;
-      }
-
-      for (let c=page_initial; c <= page_final; c ++){
-          this.pageLinks.push( { 'page':c } );
-      }
-
-      //Se genera arreglo de checkbox de seleccion general, se define la selección de todos
-      //los checkbox de la página actual
-      for ( let c=1; c <= this.pageCount; c++ ){
-        let check:boolean = false;
-        if ( this.actualPage == c ){
-          check = true;
+        for (let c=page_initial; c <= page_final; c ++){
+            this.pageLinks.push( { 'page':c } );
         }
 
-        if ( !this.checkBoxGralInfo.hasOwnProperty( c ) ){
-          this.checkBoxGralInfo[ c ] = { checked:check, pristine:true };
+        //Se genera arreglo de checkbox de seleccion general, se define la selección de todos
+        //los checkbox de la página actual
+        for ( let c=1; c <= this.pageCount; c++ ){
+          let check:boolean = false;
+          if ( this.actualPage == c ){
+            check = true;
+          }
+
+          if ( !this.checkBoxGralInfo.hasOwnProperty( c ) ){
+            this.checkBoxGralInfo[ c ] = { checked:check, pristine:true };
+          }
         }
-      }
 
-      this.gral.dismissLoading();
-      this.checkBoxRegChange();
-    } });
+        this.gral.dismissLoading();
+        this.checkBoxRegChange();
+      } });
 
-    this.ShippingGetAKO = this.config.provider.ShippingGetAKO.subscribe({  next: ( response : any) => {
+      this.getAllKO = this.config.provider.getAllKO.subscribe({  next: ( response : any) => {
 
-    } });
+      } });
+    }
+
 
     if ( this.auth.logedIn() && !this.config.hasOwnProperty( 'waitForUpdateSubject' ) ){
       this.loadPage( this.actualPage );
@@ -458,9 +434,13 @@ export class TableComponentComponent implements OnInit {
     this.filtersCollapsed            = true;
   }
 
-  getBackgrounColor( id_status:number ){
+  getBackgrounColor( id_status:number, i:number ){
+    if ( this.config.resaltado.length == 0 ){
+      return this.config.style.defaultBg[ i % 2 ];
+    }
+
     if ( !this.config.resaltado[ 0 ].enabled ){
-      return '#FFF';
+      return this.config.style.defaultBg[ i % 2 ];
     }
     return this.config.resaltado[ 0 ].colors[ id_status ];
   }
@@ -469,17 +449,27 @@ export class TableComponentComponent implements OnInit {
     this.loadPage( this.actualPage );
   }
 
+  pageSelectInputChange(){
+    if ( this.pageSelectInput <= 0 ){
+      this.pageSelectInput = 1;
+    }
+
+    if ( this.pageSelectInput > this.pageCount ){
+      this.pageSelectInput = this.pageCount;
+    }
+  }
+
   appPaginadorGoTo( page:number ){
     if ( Number.isNaN( page ) ){
-      this.gral.newMensaje( 'Solo se permite el ingreso de números.' );
+      this.gral.showMessage( 'Solo se permite el ingreso de números.' );
     }
 
     if ( page < 1 ) {
-      this.gral.newMensaje( 'El número de página debe ser mayor a 0.' );
+      this.gral.showMessage( 'El número de página debe ser mayor a 0.' );
     }
 
     if ( page > this.pageCount ) {
-      this.gral.newMensaje( 'El número de página no debe ser mayor a: '+ this.pageCount +'.' );
+      this.gral.showMessage( 'El número de página no debe ser mayor a: '+ this.pageCount +'.' );
 
     }
 
@@ -501,15 +491,18 @@ export class TableComponentComponent implements OnInit {
 
     if ( this.filterFieldContent.fieldSelec != 'unfiltered' ){
       if ( !this.validateFilterParams() ){
-          this.gral.newMensaje( 'Revise los filtros, criterio erroneo.' );
+          this.gral.showMessage( 'Revise los filtros, criterio erroneo.' );
           return false;
       }
 
       params += this.getFilterParams();
     }
 
-    this.config.provider.getAll( params );
     this.gral.presentLoading();
+
+    if ( this.config.provider != null ){
+      this.config.provider[this.config.getAllMethodName]( params );
+    }
 
     return true;
   }
@@ -523,8 +516,8 @@ export class TableComponentComponent implements OnInit {
   }
 
   ngOnDestroy(){
-    this.ShippingGetAOK.unsubscribe();
-    this.ShippingGetAKO.unsubscribe();
+    this.getAllOK.unsubscribe();
+    this.getAllKO.unsubscribe();
     this.updateTableSubject.unsubscribe();
   }
 

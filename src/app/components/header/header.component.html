@@ -1,7 +1,24 @@
-<div class="row content-h">
-  <div class="col-auto"><app-logotipo></app-logotipo></div>
-  <div class="col"></div>
-  <div class=col-auto>
-    <div class="name-cont">{{logedInName}}</div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between">
+  <div class="navbar-brand"><app-logotipo></app-logotipo></div>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <div class="row w-100">
+      <div class="col"></div>
+      <div class="col-auto">
+        <ul class="navbar-nav">
+
+          <li class="nav-item dropdown">
+            <div class="nav-link dropdown-toggle"  id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              {{logedInName}}
+            </div>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <div class="dropdown-item" *ngFor="let option of userMenuOptions" (click)="menuClick(option)">{{option.label}}</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
-</div>
+</nav>

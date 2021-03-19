@@ -1,19 +1,30 @@
-<div class="col pg-content-gral ">
-  <div class="row">
-    <div class="col">
-      <app-dashboard-finder></app-dashboard-finder>
+
+<div class="row">
+  <app-header class="col"></app-header>
+</div>
+
+<div class="row">
+  <app-tabs-menu class="col"></app-tabs-menu>
+</div>
+
+<div class="row">
+  <div class="col pg-content-gral ">
+    <div class="row">
+      <div class="col">
+        <app-dashboard-finder [filterListConfig]="filterListConfig"></app-dashboard-finder>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
+    <div class="row">
 
-    <div class="col-12 col-md-6">
-      <app-map-points></app-map-points>
+      <div class="col-12 col-md-6">
+        <app-map-points [points]="mapPoints" [config]="mapPointsConfig" class="h-100" style="display:block"></app-map-points>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <app-grilla-contenedores [tableConfig]="tableConfig"></app-grilla-contenedores>
+      </div>
+
     </div>
-
-    <div class="col-12 col-md-6">
-      <app-grilla-contenedores></app-grilla-contenedores>
-    </div>
-
   </div>
 </div>

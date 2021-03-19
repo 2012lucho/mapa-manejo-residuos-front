@@ -1,8 +1,5 @@
-<google-map width="100%"
-            height="450px"
-            [center]="center"
-            [zoom]="zoom">
-            <map-marker *ngFor="let point of points"
-              [position]="point.markerPosition"
-              [options]="point.markerOption"></map-marker>
-</google-map>
+<div class="row h-100">
+  <div class="col">
+    <div id="map" style="width:100%; height:100%" ></div>
+  </div>
+</div>

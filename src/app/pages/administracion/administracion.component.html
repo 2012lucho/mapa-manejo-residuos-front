@@ -1,9 +1,66 @@
-<div class="col pg-content-gral ">
+<app-header></app-header>
 
-  <div class="row">
-    <div class="col">
-      Administración
+<div class="row">
+  <app-tabs-menu class="col"></app-tabs-menu>
+</div>
+
+<div class="row">
+  <div class="col pg-content-gral ">
+
+    <div class="row">
+      <div class="col-12 col-sm-4 col-md-3 col-lg-2 menu-lateral">
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let item of menuItems" (click)="showMenuItem( item )" [ngClass]="{ active:item.active }">{{item.label}}</li>
+        </ul>
+      </div>
+
+      <div class="col-12 col-sm-8 col-md-9 col-lg-10">
+
+        <div class="row" *ngIf="isItemActive('empresas')">
+          <div class="col">
+            <app-empresas-abm></app-empresas-abm>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="isItemActive('tipo-cont')">
+          <div class="col">
+              <app-tipo-cont-abm></app-tipo-cont-abm>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="isItemActive('recicler-byn')">
+          <div class="col">
+              <app-recicler-byn-abm></app-recicler-byn-abm>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="isItemActive('ubicaciones')">
+          <div class="col">
+              <app-ubications-abm></app-ubications-abm>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="isItemActive('sensors')">
+          <div class="col">
+              <app-sensors-abm></app-sensors-abm>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="isItemActive('cont-fill-level')">
+          <div class="col">
+              <app-fill-level></app-fill-level>
+          </div>
+        </div>
+
+        <div class="row" *ngIf="isItemActive('users')">
+          <div class="col">
+              <app-users-abm></app-users-abm>
+          </div>
+        </div>
+
+      </div>
     </div>
+
   </div>
 
 </div>

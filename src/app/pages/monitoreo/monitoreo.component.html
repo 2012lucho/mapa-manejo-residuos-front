@@ -1,9 +1,49 @@
-<div class="col pg-content-gral ">
+<div class="row">
+  <app-header class="col"></app-header>
+</div>
 
-  <div class="row">
-    <div class="col">
-      Monitoreo
+<div class="row">
+  <app-tabs-menu class="col"></app-tabs-menu>
+</div>
+
+<div class="row">
+  <div class="col pg-content-gral ">
+
+    <div class="row">
+
+      <div class="col col-lg-6">
+        <div class="card text-center">
+          <div class="card-header">
+            Contenedores por Empresa
+          </div>
+          <div class="card-body">
+            <div echarts [options]="chartOptions" class="demo-chart"></div>
+          </div>
+          <div class="card-footer text-muted">
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col col-lg-6">
+        <div class="card text-center">
+          <div class="card-header">
+            Nivel de llenado, a lo largo del tiempo
+          </div>
+          <div class="card-body">
+            <div echarts [options]="chartOptions2" class="demo-chart2"></div>
+          </div>
+          <div class="card-footer text-muted">
+
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
+    <div class="row">
+      <div class="col">
+      </div>
+    </div>
+
+  </div>
 </div>
