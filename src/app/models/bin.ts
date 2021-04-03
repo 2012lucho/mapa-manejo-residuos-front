@@ -4,4 +4,5 @@ export class Bin {
   public byn_type_id:number = 0;
   public enterprise_id:number = 0;
   public location_id:number = 0;
+  public byn_deep:number = 0;
 }

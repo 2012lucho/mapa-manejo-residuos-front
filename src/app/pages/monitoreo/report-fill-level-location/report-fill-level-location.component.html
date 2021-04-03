@@ -1,0 +1,20 @@
+<div class="card text-center">
+  <div class="card-header">
+    Nivel de llenado, a lo largo del tiempo
+  </div>
+
+  <div class="card-body">
+    <app-bootstrap-form [config]="formConfig"></app-bootstrap-form>
+  </div>
+
+  <div class="card-header">
+    <p>Gráfico</p>
+  </div>
+
+  <div class="card-body">
+    <div echarts [options]="fillLevel" class="demo-chart2"></div>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>

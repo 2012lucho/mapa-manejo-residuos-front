@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute }    from '@angular/router';
 
+import { ReportFillLevelLocationConfig } from './report-fill-level-location/models/report.fill.level.location.config';
+
+import { FormateoService }   from '../../services/formateo.service';
 
 @Component({
   selector: 'app-monitoreo',
@@ -52,72 +56,25 @@ export class MonitoreoComponent implements OnInit {
     ]
   };
 
-  public chartOptions2:any  = {
-    title: {
-        text: ''
-    },
-    tooltip: {
-        trigger: 'axis'
-    },
-    legend: {
-        data: ['Cartón', 'Metal', 'Plástico', 'Vidrio', 'Uso General']
-    },
-    grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-    },
-    toolbox: {
-        feature: {
-            saveAsImage: {}
-        }
-    },
-    xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
-    },
-    yAxis: {
-        type: 'value'
-    },
-    series: [
-        {
-            name: 'Cartón',
-            type: 'line',
-            stack: '总量',
-            data: [30, 20, 40, 36, 20, 10, 21]
-        },
-        {
-            name: 'Metal',
-            type: 'line',
-            stack: '总量',
-            data: [5, 1, 6, 10, 9, 7, 15]
-        },
-        {
-            name: 'Plástico',
-            type: 'line',
-            stack: '总量',
-            data: [25, 25, 25, 30, 31, 32, 20]
-        },
-        {
-            name: 'Vidrio',
-            type: 'line',
-            stack: '总量',
-            data: [24, 26, 27, 28, 29, 30, 19]
-        },
-        {
-            name: 'Uso General',
-            type: 'line',
-            stack: '总量',
-            data: [80, 80, 70, 60, 50, 90, 85]
-        }
-    ]
-};
+  public RPFLLConfig:ReportFillLevelLocationConfig = new ReportFillLevelLocationConfig();
 
-  constructor() { }
+  constructor(
+    private route:           ActivatedRoute,
+    private formateoService: FormateoService
+  ) { }
 
   ngOnInit(): void {
+    this.route.params.subscribe((params: any) => {
+      if ( params.hasOwnProperty( 'graph' ) ){
+        if ( params.graph == 'location-f-level'){
+          this.RPFLLConfig.filterParams.location_id = params.location;
+          this.RPFLLConfig.filterParams.byn_id      = params.byn_id;
+          this.RPFLLConfig.filterParams.date_end    = params.date_end;
+          this.RPFLLConfig.filterParams.date_start  = params.date_start;
+          this.RPFLLConfig.updateGraph.next( true );
+        }
+      }
+    });
   }
 
 

@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Subject }           from 'rxjs';
+import { Router }          from '@angular/router';
 
 import { ReciclerBynService } from '../../services/recicler.byn.service';
 import { ConfigGrillaContenedores } from './grilla-contenedores.config.model';
@@ -17,10 +18,24 @@ export class GrillaContenedoresComponent implements OnInit {
   private rowhighlighted:number = 0;
 
   constructor(
-    private reciclerBynService: ReciclerBynService
+    private reciclerBynService: ReciclerBynService,
+    private router:             Router
   ) { }
 
   public updateTable:Subject<boolean> = new Subject();
+
+  getLimitedData( data:any, count:number = 1 ){
+    let out:any = [];
+    let d_l:number =data.length;
+    for ( let c=0; c < count; c++){
+      if (c<d_l){
+        out.push(data[c]);
+      } else {
+        out.push(null);
+      }
+    }
+    return out;
+  }
 
   ngOnInit(): void {
     this.highlightRowSubj = this.tableConfig.highlightRow.subscribe({  next: ( params: number ) => {
@@ -33,6 +48,17 @@ export class GrillaContenedoresComponent implements OnInit {
     this.highlightRow( reg.id );
   }
 
+  goToGraph( reg:any, subReg:any = -1 ){
+    this.router.navigate( [ '/monitoreo',
+    {
+      graph:      'location-f-level',
+      location:   reg.id,
+      byn_id:     subReg,
+      date_end:   this.tableConfig.filterParams.date_end,
+      date_start: this.tableConfig.filterParams.date_start,
+    }]);
+  }
+
   highlightRow( id:number ){
     this.rowhighlighted = id;
   }
@@ -42,11 +68,15 @@ export class GrillaContenedoresComponent implements OnInit {
       return '#d3f3ff';
     }
 
-    return '#fff';
+    return this.tableConfig.style.defaultBg[ id % 2 ];
   }
 
   ngOnDestroy(){
     this.highlightRowSubj.unsubscribe();
+  }
+
+  goToBinAbm(){
+    this.reciclerBynService.goToAbm();
   }
 
 }

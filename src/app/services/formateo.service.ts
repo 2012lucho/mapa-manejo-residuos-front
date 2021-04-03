@@ -12,6 +12,8 @@ export class FormateoService {
   public DATE_SEPARATOR:string    = '/';
   public DIAS_POR_MES             = [ 31,28,31,30,31,30,31,31,30,31,30,31 ];
 
+  public GTMZone = -3;
+
   public ISODate:string  = '';
   public anio:number    = 0;
   public mes:number     = 0;
@@ -23,6 +25,13 @@ export class FormateoService {
   public MAYOR = 1;
   public MENOR = -1;
   public IGUAL = 0;
+
+  addZero( i:any ) {
+    if (Number(i) < 10) {
+      i = "0" + String( i );
+    }
+    return i;
+  }
 
   /////////////////////////
   ///// TARJETAS
@@ -36,32 +45,53 @@ export class FormateoService {
     return number.replace(/\B(?=(?:\d{4})+(?!\d))/g, '-');
   }
 
+  ////////////////////////
+  //// Horario
+  getTimeFromTimeStamp( ts:number ){
+    return this.getTimeStringFromDate( new Date( ts * 1000 ) );
+  }
+
+  getTimeStringFromDate( d:Date ){
+    return this.addZero(d.getHours() - this.GTMZone) + ':' + this.addZero(d.getMinutes()) + ':' + this.addZero(d.getSeconds());
+  }
+
+  getTimeStampFTimeStr( t:any ){
+    let out:number = 0;
+    t = String( t ).split( ':' );
+    out += Number( t[0] ) * 60 * 60;
+    out += Number( t[1] ) * 60;
+    return out;
+  }
+
+  /////////////////////////
+  //// PORCENTAGE
+  getPorcentajeFNumber( num:number ){
+    return String(num) + ' %';
+  }
+
   /////////////////////////
   //// FECHAS          ////
-  getTimeStampFNgbDatePickerA( date:any ) {
-    if ( date == undefined ){
-      return '';
-    }
-    let fecha = this.getDateNgbDatepickerArray( date );
-
-    if (fecha != undefined){
-      return fecha.getTime();
-    } else {
-      return 0;
-    }
-  }
 
   getSDateFromTimeStamp( t:number ){
     let f = new Date( t * 1000 );
     return this.getStringDate( f );
   }
 
-  getFormatedDate(f:string = '', format:string='YYYY-MM-DD'){
-      if (f != ''){
-        let d : any = this.getArrayFDate(f);
+  getSDateToDateITS( t:number ){
+    let f = new Date( t * 1000 );
+    return f.getFullYear()+'-'+("0" + (f.getMonth() + 1)).slice(-2)+'-'+("0" + f.getDate()).slice(-2);
+  }
+
+  getTimeStampFDateStr( d:string ){
+    return new Date( d ).getTime() / 1000;
+  }
+
+  getFormatedDate(f:any = '', format:string='YYYY-MM-DD'){
+      if (f !== ''){
+        let d : any = this.getStringDate(f).split( this.DATE_SEPARATOR );
         // esto se puede hacer de forma mejor pero, en otro momento me
-        if (format == 'YYYY-MM-DD') { return d[0]+"-"+d[1]+"-"+d[2]; } //0 1 2
-        if (format == 'DD-MM-YYYY') { return d[2]+"-"+d[1]+"-"+d[0]; }
+        if (format == 'YYYY-MM-DD') { return d[2]+"-"+d[1]+"-"+d[0]; }
+        if (format == 'DD-MM-YYYY') { return d[0]+"-"+d[1]+"-"+d[2]; }
       }
       return '';
   }
@@ -71,90 +101,7 @@ export class FormateoService {
   }
 
   getStringDate(d:any){
-    return d.getDate() + this.DATE_SEPARATOR + (Number( d.getMonth() ) + 1)  + this.DATE_SEPARATOR + d.getFullYear();
-  }
-
-  getArrayFDate(f:any){
-    if (typeof(f) != 'string'){
-      if ('_isAMomentObject' in f) { f = new Date(f._d).toISOString();}
-    }
-    let d : any = f.split("T")[0];
-    return d.split("-");
-  }
-
-  setIsoString(f:any){
-    this.ISODate = f;
-    let fecha    = f.split('T')[0].split('-');
-    let hora     = f.split('T')[1].split('-')[0].split(':');
-    this.anio    = fecha[0];
-    this.mes     = fecha[1]-1;
-    this.dia     = fecha[2];
-    this.hora    = hora[0];
-    this.minuto  = hora[1];
-    this.segundo = hora[2];
-  }
-
-  getFechaISO(fecha:any){
-    let f = this.getArrayFDate(fecha);
-    return <string> new Date(f[0],f[1]-1,f[2],0,0,0).toISOString();
-  }
-
-  getFechaISOASP(fecha:any){
-    let f = this.getArrayFDate(fecha);
-    return <string> f[0]+'-'+f[1]+'-'+f[2]+'T'+'00:00:00.000Z';
-  }
-
-  getNgbDatepickerArrayFISO(d:any){
-    let f = new Date(d);
-    return { 'year':  f.getFullYear(),
-             'month': f.getMonth()+1,
-             'day':   f.getDate() };
-  }
-
-  getNgbDatepickerArrayString(d:any){
-    if ( d === null){ return {}; }
-
-    if ( d.hasOwnProperty('year') || (!d.hasOwnProperty('year') && typeof d !== 'string') ){ //ya tiene el formato esperado se retorna o mismo
-      return d;
-    }
-
-    let dArray:any = d.split(this.DATE_SEPARATOR);
-
-    if (dArray.length != 3){
-      return {};
-    }
-
-    if ( parseInt(dArray[1]) > 12 || parseInt(dArray[1]) < 0){
-      return {};
-    }
-
-    if (dArray[1] == 2 && (parseInt(dArray[2]) % 4 == 0 && parseInt(dArray[2]) % 100 != 0) || parseInt(dArray[2]) % 400 == 0){
-      this.DIAS_POR_MES[1] = 29;
-    }
-
-    if (dArray[0] > this.DIAS_POR_MES[ dArray[1] - 1 ] || dArray[0] < 0){
-      return {};
-    }
-
-    if (parseInt(dArray[2]).toString().length != 4){
-      return {};
-    }
-
-    return { 'year':  parseInt(dArray[2]),
-             'month': parseInt(dArray[1]),
-             'day':   parseInt(dArray[0])  };
-  }
-
-  getFISONgbDatepickerArray(d:any){
-    if ( !d.hasOwnProperty('year') ){ return d; }
-
-    return new Date(d.year, d.month-1, d.day).toISOString();
-  }
-
-  getDateNgbDatepickerArray(d:any){
-    if ( !d.hasOwnProperty('year') ){ return; }
-
-    return new Date(d.year, d.month-1, d.day);
+    return this.addZero( d.getDate() ) + this.DATE_SEPARATOR + this.addZero( (Number( d.getMonth() ) + 1) )  + this.addZero( this.DATE_SEPARATOR + d.getFullYear() );
   }
 
   //////////////////////////

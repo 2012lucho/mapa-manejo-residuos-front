@@ -15,6 +15,9 @@ export class ConfigService {
       sensorsAction:"sensors",
       usersAction:"users",
       bynsAction:"byns",
+      sensorupdatesAction:"sensor-updates",
+      fillLevelAction: "fill-levels",
+      locationsAction: "locations",
       appName: "lympio_prod_"
     };
   }

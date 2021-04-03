@@ -37,6 +37,7 @@ import { FillLevelComponent } from './pages/administracion/fill-level/fill-level
 import { AuthenticationGuard  } from './services/auth/auth.guard';
 import { SensorsAbmComponent } from './pages/administracion/sensors-abm/sensors-abm.component';
 import { UsersAbmComponent } from './pages/administracion/users-abm/users-abm.component';
+import { ReportFillLevelLocationComponent } from './pages/monitoreo/report-fill-level-location/report-fill-level-location.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { UsersAbmComponent } from './pages/administracion/users-abm/users-abm.co
     LoadingComponent, MessageComponent,
     FillLevelComponent,
     SensorsAbmComponent,
-    UsersAbmComponent
+    UsersAbmComponent,
+    ReportFillLevelLocationComponent
   ],
   imports: [
     BrowserModule,

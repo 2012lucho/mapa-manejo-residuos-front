@@ -3,5 +3,5 @@ export class Sensor {
   public byn_id:number = 0;
   public probe_interval:number = 0;
   public description:string = '';
-  public key:string = '';
+  public auth_key:string = '';
 }

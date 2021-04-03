@@ -91,7 +91,7 @@ export class ReciclerBynTypeService {
 
   public goToReciclerBynTypeSubj:Subject<any> = new Subject();
   goToReciclerBynTypeAbm(){
-    this.router.navigate( [ '/administracion' ] );
+    this.router.navigate( [ '/administracion', { subPage:'tipo-cont' } ] );
     this.goToReciclerBynTypeSubj.next(true);
   }
 

@@ -4,6 +4,7 @@ export class ConfigTableModel {
   public textNew:string                = 'Nuevo';
   public resaltado:any                 = [];
   public EnabledFilterFieldOptions:any = [];
+  public expand:string                 = '';
 
   public updateTableSubject:any        = null;
   public ExtraFilterTerms:string       = '';
@@ -76,9 +77,20 @@ export class FilterFieldConfigTableModel{
   public code:string     = '';
   public text:string     = '';
   public enabled:boolean = true;
+  public inExpand:string = '';
+  public formatFunction:any = ( i:any )=>{ return i; }
 
   constructor( config:any ){
     this.code = config.code;
     this.text = config.text;
+
+    if ( config.hasOwnProperty( 'inExpand' ) ){
+      this.inExpand = config.inExpand;
+    }
+
+    if ( config.hasOwnProperty( 'formatFunction' ) ){
+      this.formatFunction = config.formatFunction;
+    }
+
   }
 }

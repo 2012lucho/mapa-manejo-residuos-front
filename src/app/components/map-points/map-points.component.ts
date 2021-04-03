@@ -42,6 +42,9 @@ export class MapPointsComponent implements OnInit {
 
     //subscripción a actualización de mapa
     this.updateMarkersSubs = this.config.updateMarkers.subscribe({  next: ( params: any ) => {
+        if ( params.hasOwnProperty('points') ){
+          this.points = params.points;
+        }
         this.updateMarkers( map );
     } });
 

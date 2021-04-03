@@ -35,8 +35,6 @@ export class TipoContAbmComponent implements OnInit {
   private PutOK:any = null;
   private PostOK:any = null;
 
-  private action:string = 'new';
-
   constructor(
     private reciclerBynType: ReciclerBynTypeService,
     private generalService:    AppUIUtilsService
@@ -73,7 +71,7 @@ export class TipoContAbmComponent implements OnInit {
         this.showForm = true;
         this.formConfig.model = new BynType();
         this.formConfig.setTitle( 'Nuevo Tipo de Contenedor' );
-        this.action = 'create';
+        this.formConfig.setContext( 'create' );
 
         this.setFormFields( this.formConfig );
         this.setFormButtons( this.formConfig );
@@ -87,7 +85,7 @@ export class TipoContAbmComponent implements OnInit {
         this.formConfig.setTitle( 'Editar Tipo de Contenedor' );
         this.generalService.presentLoading();
         this.reciclerBynType.get( params );
-        this.action = 'edit';
+        this.formConfig.setContext( 'edit' );
 
         if ( this.getItem !== null ){
           this.getItem.unsubscribe();
@@ -106,7 +104,7 @@ export class TipoContAbmComponent implements OnInit {
 
   setFormFields( fCOnfig:BootstrapFormConfig ){
     fCOnfig.clearFields();
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Descripción:', field: 'description', type: 'text', validator: new BootstrapFormRequired() } ) );
     fCOnfig.repeatBtnInTop = false;
   }
@@ -143,7 +141,7 @@ export class TipoContAbmComponent implements OnInit {
     }
     this.formIsValidated = this.formConfig.isValidated.subscribe({  next: ( params: any ) => {
       if ( params.success == true ){
-        if (this.action == 'edit'){
+        if (fCOnfig.getContext() == 'edit'){
           this.dataPutAndSubscribeResponse( fCOnfig.model );
         } else {
           this.dataPostAndSubscribeResponse( fCOnfig.model );

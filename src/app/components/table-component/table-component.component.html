@@ -135,7 +135,7 @@
                       [(ngModel)]="checkBoxArray[ cf.id ]" [ngModelOptions]="{standalone: true}" >
             </th>
 
-            <td *ngFor="let field of config.EnabledFilterFieldOptions;" scope="col" class="text-center align-middle">{{ cf[ config.filterFieldOptions[ field ].code ] }}</td>
+            <td *ngFor="let field of config.EnabledFilterFieldOptions;" scope="col" class="text-center align-middle">{{getFieldCont( cf, config.filterFieldOptions[ field ] )}}</td>
 
             <td class="text-center align-middle" *ngIf="config.actionsEnabled">
               <button type="button" class="btn btn-info" (click)="edit( cf.id )" *ngIf="config.actionOptions.edit">    <i class="btn-table fa fa-pencil"></i> </button>

@@ -8,11 +8,17 @@ export class BootstrapFormValidator {
   protected max:any = null;
   protected minSeted:boolean = false;
   protected maxSeted:boolean = false;
+  protected enabledInContexts:string[] = [];
+  protected validationByPass:boolean = false;
 
   constructor( p:any = {} ){
     this.params = p;
     if ( p.hasOwnProperty( 'extraValidator' ) ){
       this.extraValidator = p.extraValidator;
+    }
+
+    if ( p.hasOwnProperty( 'enabledInContexts' ) ){
+      this.enabledInContexts = p.enabledInContexts;
     }
 
     if ( p.hasOwnProperty( 'min' ) ){
@@ -33,13 +39,38 @@ export class BootstrapFormValidator {
     }
   }
 
+  getContext(){
+    if ( this.fieldConfig !== null){
+      return this.fieldConfig.getContext();
+    }
+    return '';
+  }
+
   validate(){
     this.setFieldError( false );
+    //si se definió que la validación solo se aplique en algunos conextos determinados y que en
+    // otros sea opcional
+    if ( this.fieldConfig !== null && this.enabledInContexts.length > 0 ){
+      let encontrado:boolean = false;
+      let context:string     = this.getContext();
+      for ( let c=0; c < this.enabledInContexts.length; c++ ){
+        if ( this.enabledInContexts[c] == context ){
+          encontrado = true;
+        }
+      }
+      //Si la validación no esta habilitada en este contexto, retornamos true
+      if (!encontrado){
+        this.validationByPass = true;
+        return true;
+      }
+    }
+
     if ( this.extraValidator !== null ){
       let result:any = this.extraValidator.validate();
       this.error = this.extraValidator.getErrors();
       return result;
     }
+
     return true;
   }
 
@@ -63,9 +94,15 @@ export class BootstrapFormRequired extends BootstrapFormValidator {
 
   validate(){
     //Se llama al otro validador pasado como parametro (en caso de encadenar varios)
+    //Si se obtiene resultado positivo y se habilita la propiedad bypass se debe
+    //esquivar el resto
     if (!super.validate()){
       this.setFieldError( true, super.getErrors() );
       return false;
+    } else {
+      if ( this.validationByPass ){
+        return true;
+      }
     }
 
     let formConfig:any = this.fieldConfig.getFormConfig();
@@ -89,6 +126,18 @@ export class BootstrapFormNumber extends BootstrapFormValidator {
   }
 
   validate(){
+    //Se llama al otro validador pasado como parametro (en caso de encadenar varios)
+    //Si se obtiene resultado positivo y se habilita la propiedad bypass se debe
+    //esquivar el resto
+    if (!super.validate()){
+      this.setFieldError( true, super.getErrors() );
+      return false;
+    } else {
+      if ( this.validationByPass ){
+        return true;
+      }
+    }
+
     this.setFieldError( false );
     let formConfig:any = this.fieldConfig.getFormConfig();
 
@@ -119,6 +168,18 @@ export class BootstrapFormDate extends BootstrapFormValidator {
   }
 
   validate(){
+    //Se llama al otro validador pasado como parametro (en caso de encadenar varios)
+    //Si se obtiene resultado positivo y se habilita la propiedad bypass se debe
+    //esquivar el resto
+    if (!super.validate()){
+      this.setFieldError( true, super.getErrors() );
+      return false;
+    } else {
+      if ( this.validationByPass ){
+        return true;
+      }
+    }
+    
     this.setFieldError( false );
     let formConfig:any = this.fieldConfig.getFormConfig();
 

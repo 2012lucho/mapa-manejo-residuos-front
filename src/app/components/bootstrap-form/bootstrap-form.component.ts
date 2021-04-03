@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 
-import { BootstrapFormConfig, ButtonBootstrapFormConfig } from './model/bootstrap-form-config';
+import { BootstrapFormConfig, ButtonBootstrapFormConfig, BootstrapFormElement } from './model/bootstrap-form-config';
 
 @Component({
   selector: 'app-bootstrap-form',
@@ -12,6 +12,7 @@ export class BootstrapFormComponent implements OnInit {
   @Input() config:BootstrapFormConfig = new BootstrapFormConfig();
 
   private loadData:any = null;
+  private formatModelData:any = null;
   private subscriptionDataOrigin:any = [];
   private validateForm:any = null;
   private validationResult:any = { success:true, errors:[] }
@@ -19,14 +20,21 @@ export class BootstrapFormComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    this.formatModelData = this.config.formatModelData.subscribe({  next: ( params: any ) => {
+      for ( let c=0; c < this.config.elements.length; c++ ){
+        this.config.model[ this.config.elements[ c ].field ] = this.config.elements[ c ].formatFunction( this.config.model[ this.config.elements[ c ].field ] );
+      }
+      this.config.modelDataFormated.next( { extraInfo:{ validationResult:this.validationResult } } );
+    } });
+
     this.loadData = this.config.loadData.subscribe({  next: ( params: any ) => {
-      for ( let c=0; c < this.config.fields.length; c++ ){
-        if ( this.config.fields[ c ].type == 'select' ){
-          let subscriptionDO:any = this.config.fields[ c ].originDataSubject.subscribe({  next: ( params: any ) => {
-             this.config.fields[ c ].options = this.config.fields[ c ].provider.getDataFBootstrapForm( params );
+      for ( let c=0; c < this.config.elements.length; c++ ){
+        if ( this.config.elements[ c ].type == 'select' && this.config.elements[ c ].originDataSubject !== null ){
+          let subscriptionDO:any = this.config.elements[ c ].originDataSubject.subscribe({  next: ( params: any ) => {
+             this.config.elements[ c ].options = this.config.elements[ c ].provider.getDataFBootstrapForm( params );
           }});
           this.subscriptionDataOrigin.push( subscriptionDO );
-          this.config.fields[ c ].provider[this.config.fields[ c ].getDataFunction]();
+          this.config.elements[ c ].provider[this.config.elements[ c ].getDataFunction]();
         }
       }
     } });
@@ -35,14 +43,16 @@ export class BootstrapFormComponent implements OnInit {
     this.validateForm = this.config.validateForm.subscribe({  next: ( params: any ) => {
       this.validationResult.errors = [];
       this.validationResult.success = true;
-      for ( let c=0; c < this.config.fields.length; c++ ){
-        if ( this.config.fields[ c ].validator !== null && !this.config.fields[ c ].validator.validate() ){
+      for ( let c=0; c < this.config.elements.length; c++ ){
+        if ( this.config.elements[ c ].validator !== null && !this.config.elements[ c ].validator.validate() ){
             this.validationResult.success = false;
-            this.validationResult.errors.push( this.config.fields[ c ].getValidatorErrors() );
+            this.validationResult.errors.push( this.config.elements[ c ].getValidatorErrors() );
         }
       }
       this.config.isValidated.next( this.validationResult );
+
     } });
+
   }
 
   fieldEmpty( input:any ){
@@ -56,12 +66,13 @@ export class BootstrapFormComponent implements OnInit {
       }
   }
 
-  btnOnClik( btn:ButtonBootstrapFormConfig ){
-    btn.onClick.next();
+  elementOnClik( element:BootstrapFormElement ){
+    element.onClick.next();
   }
 
   ngOnDestroy(){
     this.loadData.unsubscribe();
+    this.formatModelData.unsubscribe();
     this.validateForm.unsubscribe();
   }
 

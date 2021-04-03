@@ -116,7 +116,7 @@ export class EnterpriseService {
 
   public goToEnterpriseSubj:Subject<any> = new Subject();
   goToEnterpriseAbm(){
-    this.router.navigate( [ '/administracion' ] );
+    this.router.navigate( [ '/administracion', { subPage:'empresas' } ] );
     this.goToEnterpriseSubj.next(true);
   }
 }

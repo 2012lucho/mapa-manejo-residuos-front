@@ -34,7 +34,6 @@ export class EmpresasAbmComponent implements OnInit {
   private PostOK:any = null;
 
   private formIsValidated:any = null;
-  private action:string = 'create';
   constructor(
     private enterpriseService: EnterpriseService,
     private generalService:    AppUIUtilsService
@@ -91,7 +90,7 @@ export class EmpresasAbmComponent implements OnInit {
         this.showForm = true;
         this.formConfig.setTitle( 'Nueva Empresa' );
         this.formConfig.model = new Enterprise();
-        this.action = 'create';
+        this.formConfig.setContext( 'create' );
 
         this.setFormFields( this.formConfig );
         this.setFormButtons( this.formConfig );
@@ -105,7 +104,7 @@ export class EmpresasAbmComponent implements OnInit {
         this.formConfig.setTitle( 'Editar Empresa' );
         this.generalService.presentLoading();
         this.enterpriseService.get( params );
-        this.action = 'edit';
+        this.formConfig.setContext( 'edit' );
 
         if ( this.getItem !== null ){
           this.getItem.unsubscribe();
@@ -125,21 +124,21 @@ export class EmpresasAbmComponent implements OnInit {
 
   setFormFields( fCOnfig:BootstrapFormConfig ){
     fCOnfig.clearFields();
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Nombre de la empresa:', field: 'name', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'RUT:', field: 'rut', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Dirección (calle):', field: 'address_road', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Dirección (número):', field: 'address_number', type: 'number', validator: new BootstrapFormRequired({ extraValidator:new BootstrapFormNumber({ min:0, max:100000 }) }) } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Administrador (nombre/s):', field: 'admin_name', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Administrador (apellido/s):', field: 'admin_surname', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Contacto (teléfono):', field: 'phone', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Contacto (Email):', field: 'email', type: 'email', validator: new BootstrapFormRequired() } ) );
   }
 
@@ -175,7 +174,7 @@ export class EmpresasAbmComponent implements OnInit {
     }
     this.formIsValidated = fCOnfig.isValidated.subscribe({  next: ( params: any ) => {
         if ( params.success == true ){
-          if (this.action == 'edit'){
+          if (fCOnfig.getContext() == 'edit'){
             this.dataPutAndSubscribeResponse( fCOnfig.model );
           } else {
             this.dataPostAndSubscribeResponse( fCOnfig.model );

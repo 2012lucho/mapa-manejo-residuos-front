@@ -22,22 +22,28 @@ export class SensorsAbmComponent implements OnInit {
   public formConfig:BootstrapFormConfig = new BootstrapFormConfig();
 
   public tableConfig:ConfigTableModel = new ConfigTableModel();
-  private action:string = 'create';
 
   private goToCreate:any = null;
   private goToEdit:any   = null;
 
   private saveBtnEvnt:any = null;
   private backBtnEvnt:any = null;
+  private updateKeyBtnEvnt:any = null;
   private backBtn:any = null;
   private saveBtn:any = null;
+  private updateKeyBtn:any = null;
+  private updateKey:boolean = false;
 
   private goToSensorSubj:any = null;
-  private formIsValidated:any    = null;
+  private formIsValidated:any = null;
+  private contextChanged:any = null;
 
   private getItem:any = null;
   private PutOK:any   = null;
   private PostOK:any  = null;
+
+  private field_ak:any = null;
+  private key_place_older:string = '**************';
 
   constructor(
     private sensorService:      SensorService,
@@ -81,10 +87,11 @@ export class SensorsAbmComponent implements OnInit {
         this.showForm = true;
         this.formConfig.setTitle( 'Nuevo Sensor' );
         this.formConfig.model = new Sensor();
-        this.action = 'create';
 
         this.setFormFields( this.formConfig );
         this.setFormButtons( this.formConfig );
+        this.formConfig.setContext( 'create' );
+        this.field_ak.setType( 'text' );
     } });
 
     if ( this.goToEdit !== null ){
@@ -95,7 +102,6 @@ export class SensorsAbmComponent implements OnInit {
         this.formConfig.setTitle( 'Editar Sensor' );
         this.generalService.presentLoading();
         this.sensorService.get( params );
-        this.action = 'edit';
 
         if ( this.getItem !== null ){
           this.getItem.unsubscribe();
@@ -103,27 +109,63 @@ export class SensorsAbmComponent implements OnInit {
         this.getItem = this.sensorService.getOK.subscribe({  next: ( params: any ) => {
             this.generalService.dismissLoading();
             this.formConfig.model = params;
+            this.field_ak.setType( 'password' );
+            this.formConfig.model.auth_key = this.key_place_older;
         } });
 
         this.setFormFields( this.formConfig );
         this.setFormButtons( this.formConfig );
+        this.formConfig.setContext( 'edit' );
     } });
 
     this.showForm = false;
 
+    if ( this.contextChanged === null){
+      this.contextChanged = this.formConfig.contextChanged.subscribe({  next: ( params: any ) => {
+          switch ( params.context ){
+            case 'create':
+              this.field_ak.setDisabled( false );
+            break;
+
+            case 'edit':
+              this.field_ak.setDisabled( true );
+            break;
+          }
+      } });
+    }
   }
 
   setFormFields( fCOnfig:BootstrapFormConfig ){
     fCOnfig.clearFields();
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Contenedor:', field: 'byn_id', type: 'select', validator: new BootstrapFormRequired(),
         originDataSubject:this.reciclerBynService.getAllOK, provider: this.reciclerBynService, getDataFunction:'getRecicleyBynData'} ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Intervalo de medición:', field: 'probe_interval', type: 'number', validator: new BootstrapFormRequired({ extraValidator:new BootstrapFormNumber({ min:0, max:10000 }) }) } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
-      { title:'Descipción:', field: 'description', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
-      { title:'Key:', field: 'key', type: 'string', validator: new BootstrapFormRequired() } ) );
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
+      { title:'Descripción:', field: 'description', type: 'text', validator: new BootstrapFormRequired() } ) );
+
+    this.field_ak =  new FieldBootstrapFormConfig(
+      { title:'Key:', field: 'auth_key', type: 'text', validator: new BootstrapFormRequired( { enabledInContexts:['create'] } ) } );
+    fCOnfig.AddElement( this.field_ak );
+
+    this.updateKeyBtn = new ButtonBootstrapFormConfig( { title:'Modificar Key', type: 'button', visibleOnlyInContexts:['edit'] } );
+    fCOnfig.AddElement( this.updateKeyBtn );
+    if (this.updateKeyBtnEvnt !== null){ this.updateKeyBtnEvnt.unsubscribe(); }
+    this.updateKeyBtnEvnt = this.updateKeyBtn.onClick.subscribe({  next: ( params: any ) => {
+        this.updateKey = !this.updateKey;
+        this.field_ak.setDisabled( !this.updateKey );
+        if ( this.updateKey ){
+          this.field_ak.setType( 'text' );
+          this.formConfig.model.auth_key = '';
+          this.field_ak.validator.enabledInContexts = [];
+        } else {
+          this.field_ak.setType( 'password' );
+          this.formConfig.model.auth_key = this.key_place_older;
+          this.field_ak.validator.enabledInContexts = ['create'];
+        }
+    } });
+
     fCOnfig.repeatBtnInTop = false;
     fCOnfig.loadData.next(true);
   }
@@ -134,33 +176,25 @@ export class SensorsAbmComponent implements OnInit {
     this.backBtn = fCOnfig.addButton( new ButtonBootstrapFormConfig( { title:'Volver' } ) );
     this.saveBtn = fCOnfig.addButton( new ButtonBootstrapFormConfig( { title:'Guardar' } ) );
 
-    if ( this.saveBtnEvnt !== null) {
-      this.saveBtnEvnt.unsubscribe();
-    }
+    if ( this.saveBtnEvnt !== null) { this.saveBtnEvnt.unsubscribe(); }
     this.saveBtnEvnt = this.saveBtn.onClick.subscribe({  next: ( params: any ) => {
         fCOnfig.validateForm.next();
     } });
 
-    if ( this.backBtnEvnt !== null){
-        this.backBtnEvnt.unsubscribe();
-    }
+    if ( this.backBtnEvnt !== null){ this.backBtnEvnt.unsubscribe();  }
     this.backBtnEvnt = this.backBtn.onClick.subscribe({  next: ( params: any ) => {
         this.sensorService.goToSensorsAbm();
     } });
 
-    if ( this.goToSensorSubj !== null) {
-        this.goToSensorSubj.unsubscribe();
-    }
+    if ( this.goToSensorSubj !== null) { this.goToSensorSubj.unsubscribe(); }
     this.goToSensorSubj = this.sensorService.goToSensorSubj.subscribe({  next: ( params: any ) => {
         this.setConfig();
     } });
 
-    if ( this.formIsValidated !== null ){
-      this.formIsValidated.unsubscribe();
-    }
+    if ( this.formIsValidated !== null ){ this.formIsValidated.unsubscribe(); }
     this.formIsValidated = fCOnfig.isValidated.subscribe({  next: ( params: any ) => {
         if ( params.success == true ){
-          if (this.action == 'edit'){
+          if ( fCOnfig.getContext() == 'edit'){
             this.dataPutAndSubscribeResponse( fCOnfig.model );
           } else {
             this.dataPostAndSubscribeResponse( fCOnfig.model );
@@ -185,6 +219,11 @@ export class SensorsAbmComponent implements OnInit {
     } });
 
     this.generalService.presentLoading();
+
+    //Se verifica si no se debe editar la key se quita el campo
+    if ( !this.updateKey ){
+      delete model.auth_key;
+    }
     this.sensorService.put( model );
 
   }
@@ -227,6 +266,12 @@ export class SensorsAbmComponent implements OnInit {
     }
     if ( this.PostOK !== null ){
       this.PostOK.unsubscribe();
+    }
+    if ( this.updateKeyBtnEvnt !== null ){
+      this.updateKeyBtnEvnt.unsubscribe();
+    }
+    if ( this.contextChanged !== null){
+      this.contextChanged.unsubscribe();
     }
   }
 

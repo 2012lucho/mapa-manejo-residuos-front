@@ -6,23 +6,33 @@
 
 <div class="row" *ngIf="config.repeatBtnInTop">
   <div class="col-auto" *ngFor="let btn of config.buttons">
-      <button type="submit" class="btn {{btn.buttonExtraClass}}" (click)="btnOnClik( btn )">{{btn.title}}</button>
+      <button type="submit" class="btn {{btn.getExtraClass()}}" (click)="elementOnClik( btn )">{{btn.getTitle()}}</button>
   </div>
   <div class="col"></div>
 </div>
 
 <div class="row">
-    <div class="col col-md-6 col-lg-4 form-group" *ngFor="let field of config.fields">
-      <label for="{{field.field}}">{{field.title}}</label>
-      <input type="{{field.type}}" *ngIf="field.type !== 'select'"
-              class="form-control" [ngClass]="{bootstrapFieldError:field.onError}"
-              id="{{field.field}}" aria-describedby="emailHelp" placeholder="{{field.placeholder}}"
-              [(ngModel)]="config.model[field.field]" [ngModelOptions]="{standalone: true}">
+    <div class="{{config.elementContentClass}} form-group" *ngFor="let element of config.elements">
+      <label for="{{element.field}}"
+              *ngIf="element.isElementType('field')">{{element.getTitle()}}</label>
+      <input type="{{element.type}}" id="{{element.field}}" aria-describedby="emailHelp"
+              *ngIf="element.isElementType('field') && element.isVisible() && element.isInputType()"
+              class="form-control {{element.getExtraClass()}}" [ngClass]="{bootstrapFieldError:element.onError}"
+              [disabled] = "element.getDisabled()"
+              (click)="elementOnClik( element )"
+              [(ngModel)]="config.model[element.field]" [ngModelOptions]="{standalone: true}">
 
-      <select class="form-control" id="{{field.field}}" *ngIf="field.type == 'select'"
-                [ngClass]="{bootstrapFieldError:field.onError}"
-                [(ngModel)]="config.model[field.field]" [ngModelOptions]="{standalone: true}">
-        <option *ngFor="let option of field.options" value="{{option.value}}">{{option.text}}</option>
+      <button class="btn {{element.getExtraClass()}}" style="margin-top: 2em;"
+              (click)="elementOnClik( element )"
+              *ngIf="element.isElementType('button') && element.isVisible() && element.isInputType()">{{element.getTitle()}}</button>
+
+      <select class="form-control {{element.getExtraClass()}}" id="{{element.field}}"
+                *ngIf="element.isElementType('field') && element.isVisible() && element.isType( 'select' )"
+                [ngClass]="{bootstrapFieldError:element.onError}"
+                [disabled] = "element.getDisabled()"
+                (click)="elementOnClik( element )"
+                [(ngModel)]="config.model[element.field]" [ngModelOptions]="{standalone: true}">
+        <option *ngFor="let option of element.options" value="{{option.value}}">{{option.text}}</option>
       </select>
     </div>
 
@@ -30,7 +40,7 @@
 
 <div class="row">
   <div class="col-auto" *ngFor="let btn of config.buttons">
-      <button type="submit" class="btn {{btn.buttonExtraClass}}" (click)="btnOnClik( btn )">{{btn.title}}</button>
+      <button type="submit" class="btn {{btn.getExtraClass()}}" (click)="elementOnClik( btn )">{{btn.getTitle()}}</button>
   </div>
   <div class="col"></div>
 </div>

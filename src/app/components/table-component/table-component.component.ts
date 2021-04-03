@@ -175,6 +175,13 @@ export class TableComponentComponent implements OnInit {
     this.filtersInic();
   }
 
+  getFieldCont( reg:any, fieldConfig:any ){
+    if ( fieldConfig.inExpand !== '' ){
+      return fieldConfig.formatFunction( reg[ fieldConfig.inExpand ][ fieldConfig.code ] );
+    }
+    return fieldConfig.formatFunction( reg[ fieldConfig.code ] );
+  }
+
   filtersInic(){
     //se revisa si está agregada la opción sin filtro, en caso de no estar, se agrega
     let found:boolean = false;
@@ -487,7 +494,7 @@ export class TableComponentComponent implements OnInit {
 
     this.actualPage = page;
 
-    let params:string = '?expand=originBranchOffice,serviceType,destinationBranchOffice,vehicle&page=' + this.actualPage + this.config.ExtraFilterTerms;
+    let params:string = this.config.expand + 'page=' + this.actualPage + this.config.ExtraFilterTerms;
 
     if ( this.filterFieldContent.fieldSelec != 'unfiltered' ){
       if ( !this.validateFilterParams() ){

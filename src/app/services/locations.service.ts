@@ -7,10 +7,12 @@ import { ConfigService }   from './config.service';
 import { AuthService }     from './auth/auth.service';
 import { AppUIUtilsService }     from './app.ui.utils.service';
 
-import { Sensor }  from '../models/sensor';
+import { Location }          from '../models/location';
+import { MapPoint }          from '../components/map-points/model/map-point';
+import { MapPointConfig }    from '../components/map-points/model/map.points.config';
 
 @Injectable({ providedIn: 'root' })
-export class SensorService {
+export class LocationsService {
 
   constructor(
     private router:        Router,
@@ -22,17 +24,20 @@ export class SensorService {
     this.configData = this.configService.getConfigData();
   }
 
+  public EnterprisePostOK:Subject<any> = new Subject();
+  public EnterprisePostKO:Subject<any> = new Subject();
+
   private configData:any = {};
 
   public getAllOK:Subject<any>           = new Subject();
   public getAllKO:Subject<any>           = new Subject();
   public updateTableSubject:Subject<any> = new Subject();
 
-  private mainAction:string = 'sensorsAction';
+  private mainAction:string = 'locationsAction';
 
   private LastElement:any = {};
-  getAllSensorsData( params:any ){
-    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ],
+  getAll( params:any = ''){
+    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ] + params,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
             this.LastElement = data;
@@ -45,10 +50,24 @@ export class SensorService {
       );
   }
 
+  getMapPoints( params:any, mapPointConfig:MapPointConfig ){
+    let out:MapPoint[] = [];
+
+    for ( let c=0; c < params.length; c++){
+      out.push( new MapPoint(
+        { lat: params[ c ].latitude, lng: params[ c ].longitude },
+        { draggable: false, label: String( params[ c ].id ) },
+        { url:'./assets/circle1.png', scaledSize: { width:25, height:25 } }
+      ) );
+    }
+
+    return out;
+  }
+
   public getOK:Subject<any>           = new Subject();
   public getKO:Subject<any>           = new Subject();
-  get( id:number ){
-    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ]+'/'+id,
+  get( id:number, extraParams:string='' ){
+    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ]+'/'+id+extraParams,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
             this.LastElement = data;
@@ -64,7 +83,7 @@ export class SensorService {
   getDataFBootstrapForm( params:any ){
     let out:any = [];
     for (let c = 0; c < params.items.length; c++){
-      out.push({ value: params.items[c].id, text:params.items[c].name });
+      out.push({ value: params.items[c].id, text:params.items[c].description });
     }
     return out;
   }
@@ -77,7 +96,7 @@ export class SensorService {
 
   public PostOK:Subject<any> = new Subject();
   public PostKO:Subject<any> = new Subject();
-  post( model:Sensor ){
+  post( model:Location ){
     this.http.post( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ], model,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
@@ -99,7 +118,7 @@ export class SensorService {
 
   public PutOK:Subject<any> = new Subject();
   public PutKO:Subject<any> = new Subject();
-  put( model:Sensor ){
+  put( model:Location ){
     this.http.put( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ]+'/'+model.id, model,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
@@ -113,9 +132,9 @@ export class SensorService {
       );
   }
 
-  public goToSensorSubj:Subject<any> = new Subject();
-  goToSensorsAbm(){
-    this.router.navigate( [ '/administracion', { subPage:'sensores' } ] );
-    this.goToSensorSubj.next(true);
+  public goToLocationSubj:Subject<any> = new Subject();
+  goToLocationsAbm(){
+    this.router.navigate( [ '/administracion' ] );
+    this.goToLocationSubj.next(true);
   }
 }

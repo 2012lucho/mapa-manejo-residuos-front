@@ -26,17 +26,7 @@
       </div>
 
       <div class="col col-lg-6">
-        <div class="card text-center">
-          <div class="card-header">
-            Nivel de llenado, a lo largo del tiempo
-          </div>
-          <div class="card-body">
-            <div echarts [options]="chartOptions2" class="demo-chart2"></div>
-          </div>
-          <div class="card-footer text-muted">
-
-          </div>
-        </div>
+        <app-report-fill-level-location [config]="RPFLLConfig"></app-report-fill-level-location>
       </div>
     </div>
 

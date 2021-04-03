@@ -20,7 +20,7 @@ export class MapSelectPointComponent implements OnInit {
 
   public map:any=null;
   private marker:any = null;
-
+  private setCordsSubj:any = null;
   @Input() config:MapSelectModelConfig = new MapSelectModelConfig();
 
   ngOnInit(): void {
@@ -34,16 +34,29 @@ export class MapSelectPointComponent implements OnInit {
     );
     this.map = map;
 
+    this.setMarkerConfig( this.map, this.config.center);
+
+     this.setCordsSubj = this.config.setCordsSubj.subscribe({  next: ( params: any ) => {
+       this.marker.setMap( null );
+       this.setMarkerConfig( this.map, params);
+     } });
+  }
+
+  setMarkerConfig( map:any, position:any ){
     this.marker = new google.maps.Marker({
-       position: this.config.center,
+       position: position,
        map,
        draggable:  true
      });
 
-     this.marker.addListener("mouseover", () => {
+     this.marker.addListener("mouseout", () => {
         this.config.markerMove.next( this.marker );
      });
      this.config.markerMove.next( this.marker );
   }
-  
+
+  ngOnDestroy(){
+    this.setCordsSubj.unsubscribe();
+  }
+
 }

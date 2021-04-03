@@ -3,9 +3,7 @@ import { Subject }         from 'rxjs';
 import { Router }          from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { MapPoint }                   from '../components/map-points/model/map-point';
 import { DashboardFinderConfigModel } from '../components/dashboard-finder/dashboard-finder.config.model';
-import { MapPointConfig }             from '../components/map-points/model/map.points.config';
 
 import { ConfigService }        from './config.service';
 import { AuthService }          from './auth/auth.service';
@@ -36,8 +34,8 @@ export class ReciclerBynService {
   private mainAction = 'bynsAction';
 
   private LastElement:any = {};
-  getRecicleyBynData( params:any ){
-    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ],
+  getRecicleyBynData( params:string = '' ){
+    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ] + params,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
             this.LastElement = data;
@@ -80,20 +78,6 @@ export class ReciclerBynService {
     this.router.navigate( [ '/' ] );
   }
 
-  getMapPoints( params:any, mapPointConfig:MapPointConfig ){
-    let out:MapPoint[] = [];
-/*
-    for ( let c=0; c < params.length; c++){
-      out.push( new MapPoint(
-        { lat: params[ c ].cc.lat, lng: params[ c ].cc.lng },
-        { draggable: false, label: params[ c ].id },
-        { url:'./assets/circle1.png', scaledSize: { width:25, height:25 } }
-      ) );
-    }
-*/
-    return out;
-  }
-
   getFilterListConfig(): DashboardFinderConfigModel{
     let config:DashboardFinderConfigModel = new DashboardFinderConfigModel();
 
@@ -132,14 +116,8 @@ export class ReciclerBynService {
 
   public goToAbmSubj:Subject<any> = new Subject();
   goToAbm(){
-    this.router.navigate( [ '/administracion' ] );
+    this.router.navigate( [ '/administracion', { subPage:'contenedores' } ] );
     this.goToAbmSubj.next(true);
-  }
-
-  public goToAbmFillLevelSubj:Subject<any> = new Subject();
-  goToAbmFillLevel(){
-    this.router.navigate( [ '/administracion' ] );
-    this.goToAbmFillLevelSubj.next(true);
   }
 
   public goToEditSubj:Subject<any> = new Subject();

@@ -7,10 +7,10 @@ import { ConfigService }   from './config.service';
 import { AuthService }     from './auth/auth.service';
 import { AppUIUtilsService }     from './app.ui.utils.service';
 
-import { Sensor }  from '../models/sensor';
+import { FillLevel }  from '../models/fill.level';
 
 @Injectable({ providedIn: 'root' })
-export class SensorService {
+export class FillLevelService {
 
   constructor(
     private router:        Router,
@@ -22,17 +22,20 @@ export class SensorService {
     this.configData = this.configService.getConfigData();
   }
 
+  private mainAction:string = 'fillLevelAction';
+
+  public FillLevelPostOK:Subject<any> = new Subject();
+  public FillLevelPostKO:Subject<any> = new Subject();
+
   private configData:any = {};
 
   public getAllOK:Subject<any>           = new Subject();
   public getAllKO:Subject<any>           = new Subject();
   public updateTableSubject:Subject<any> = new Subject();
 
-  private mainAction:string = 'sensorsAction';
-
   private LastElement:any = {};
-  getAllSensorsData( params:any ){
-    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ],
+  getAllFillLevelData( params:string = '' ){
+    this.http.get( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ] + params,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
             this.LastElement = data;
@@ -77,7 +80,7 @@ export class SensorService {
 
   public PostOK:Subject<any> = new Subject();
   public PostKO:Subject<any> = new Subject();
-  post( model:Sensor ){
+  post( model:FillLevel ){
     this.http.post( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ], model,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
@@ -99,7 +102,7 @@ export class SensorService {
 
   public PutOK:Subject<any> = new Subject();
   public PutKO:Subject<any> = new Subject();
-  put( model:Sensor ){
+  put( model:FillLevel ){
     this.http.put( this.configData['apiBaseUrl'] + this.configData[ this.mainAction ]+'/'+model.id, model,
       { headers: new HttpHeaders({ 'Content-Type':  'application/json', 'Authorization':'Bearer ' + this.authService.getToken() }) }).subscribe(
         data => {
@@ -113,9 +116,9 @@ export class SensorService {
       );
   }
 
-  public goToSensorSubj:Subject<any> = new Subject();
-  goToSensorsAbm(){
-    this.router.navigate( [ '/administracion', { subPage:'sensores' } ] );
-    this.goToSensorSubj.next(true);
+  public goToAbmFillLevelSubj:Subject<any> = new Subject();
+  goToFillLevelAbm(){
+    this.router.navigate( [ '/administracion', { subPage:'nivelLlenado' } ] );
+    this.goToAbmFillLevelSubj.next(true);
   }
 }

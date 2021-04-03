@@ -35,7 +35,6 @@ export class UsersAbmComponent implements OnInit {
   private PostOK:any = null;
 
   private formIsValidated:any = null;
-  private action:string = 'new';
 
   constructor(
     private usersService:      UsersService,
@@ -75,7 +74,7 @@ export class UsersAbmComponent implements OnInit {
         this.showForm = true;
         this.formConfig.setTitle( 'Nuevo Usuario' );
         this.formConfig.model = new User();
-        this.action = 'create';
+        this.formConfig.setContext( 'create' );
 
         this.setFormFields( this.formConfig );
         this.setFormButtons( this.formConfig );
@@ -89,7 +88,7 @@ export class UsersAbmComponent implements OnInit {
         this.formConfig.setTitle( 'Editar Usuario' );
         this.generalService.presentLoading();
         this.usersService.get( params );
-        this.action = 'edit';
+        this.formConfig.setContext( 'edit' );
 
         if ( this.getItem !== null ){
           this.getItem.unsubscribe();
@@ -109,11 +108,11 @@ export class UsersAbmComponent implements OnInit {
 
   setFormFields( fCOnfig:BootstrapFormConfig ):void{
     fCOnfig.clearFields();
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Nombre de usuario:', field: 'username', type: 'text', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Contraseña:', field: 'password', type: 'password', validator: new BootstrapFormRequired() } ) );
-    fCOnfig.addField( new FieldBootstrapFormConfig(
+    fCOnfig.AddElement( new FieldBootstrapFormConfig(
       { title:'Rol:', field: 'role_id', type: 'select', validator: new BootstrapFormRequired(),
         originDataSubject:this.usersService.getAllRolesOK, provider: this.usersService, getDataFunction:'getRoles' } ) );
   }
@@ -150,7 +149,7 @@ export class UsersAbmComponent implements OnInit {
     }
     this.formIsValidated = fCOnfig.isValidated.subscribe({  next: ( params: any ) => {
         if ( params.success == true ){
-          if (this.action == 'edit'){
+          if (fCOnfig.getContext() == 'edit'){
             this.dataPutAndSubscribeResponse( fCOnfig.model );
           } else {
             this.dataPostAndSubscribeResponse( fCOnfig.model );
