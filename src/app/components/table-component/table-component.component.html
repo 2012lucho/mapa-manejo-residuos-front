@@ -121,7 +121,7 @@
         <thead class="">
           <tr>
             <th scope="col-auto" class="text-center align-middle" *ngIf="config.regSelect">
-              <input class="" type="checkbox" *ngIf="shippings.length > 0"
+              <input class="" type="checkbox" *ngIf="rowData.length > 0"
                       [(ngModel)]="checkBoxGralInfo[ actualPage ].checked" (change)="checkAllClick()" [ngModelOptions]="{standalone: true}" >
             </th>
             <th *ngFor="let field of config.EnabledFilterFieldOptions;" scope="col" class="text-center align-middle">{{ config.filterFieldOptions[ field ].text }}</th>
@@ -129,7 +129,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let cf of shippings; let i = index" [style.background-color]="getBackgrounColor( cf.status_id, i )">
+          <tr *ngFor="let cf of rowData; let i = index" [style.background-color]="getBackgrounColor( cf.status_id, i )">
             <th scope="col" class="text-center align-middle" *ngIf="config.regSelect">
               <input class="" type="checkbox" (change)="checkBoxRegChange()"
                       [(ngModel)]="checkBoxArray[ cf.id ]" [ngModelOptions]="{standalone: true}" >
@@ -142,7 +142,7 @@
             </td>
           </tr>
 
-          <tr class="text-center align-middle" *ngIf="shippings.length == 0">
+          <tr class="text-center align-middle" *ngIf="rowData.length == 0">
             <td class="text-center align-middle" colspan="20"> No se obtuvieron resultados.</td>
           </tr>
         </tbody>

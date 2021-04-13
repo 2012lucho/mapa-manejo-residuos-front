@@ -21,7 +21,7 @@ export class TableComponentComponent implements OnInit {
   private getAllKO:Subject<any>     = new Subject();
   private updateTableSubject:Subject<any> = new Subject();
 
-  public shippings:any = [];
+  public rowData:any = [];
 
   public actualPage:number      = 1;
   public totalRegs:number       = 0;
@@ -69,7 +69,7 @@ export class TableComponentComponent implements OnInit {
     if ( this.config.updateTableSubject != undefined ){
       this.updateTableSubject = this.config.updateTableSubject.subscribe({  next: ( params : any) => {
         if ( this.auth.logedIn() ){
-          this.shippings        = [];
+          this.rowData        = [];
           this.checkBoxArray    = [];
           this.checkBoxGralInfo = {};
           this.actualPage       = 1;
@@ -105,12 +105,12 @@ export class TableComponentComponent implements OnInit {
 
     if ( this.config.provider != null ){
       this.getAllOK = this.config.provider.getAllOK.subscribe({  next: ( response : any ) => {
-        this.shippings = [];
+        this.rowData = [];
 
         for ( let c=0; c < response.items.length; c ++ ){
           let reg:any =  response.items[ c ];
 
-          this.shippings.push( reg );
+          this.rowData.push( reg );
 
           // si la clave ya existe no se sobreescribe su valor
           if ( !this.checkBoxArray.hasOwnProperty( String( response.items[ c ].id ) ) && this.actualPage != 0 ){
@@ -301,8 +301,8 @@ export class TableComponentComponent implements OnInit {
   }
 
   checkAllClick(){
-    for ( let c = 0; c < this.shippings.length; c++ ){
-      this.checkBoxArray[ this.shippings[ c ].id ]      = this.checkBoxGralInfo[ this.actualPage ].checked;
+    for ( let c = 0; c < this.rowData.length; c++ ){
+      this.checkBoxArray[ this.rowData[ c ].id ]      = this.checkBoxGralInfo[ this.actualPage ].checked;
       this.checkBoxGralInfo[ this.actualPage ].pristine = false;
     }
 
@@ -397,9 +397,9 @@ export class TableComponentComponent implements OnInit {
     //se recorren los envios para armar un nuevo arreglo con la información de los registros seleccionados para ser usado en el .pdf de hoja de ruta
     this.regData = [];
     for ( let i=0; i < this.checkBoxSelected.length; i++ ){ //[MODIFICAR] Esto se puede hacer de forma mas eficiente
-      for ( let c=0; c < this.shippings.length; c++ ){
-        if ( Number( this.shippings[ c ].id ) == Number ( this.checkBoxSelected[ i ] ) ){
-          this.regData.push( this.shippings[ c ] );
+      for ( let c=0; c < this.rowData.length; c++ ){
+        if ( Number( this.rowData[ c ].id ) == Number ( this.checkBoxSelected[ i ] ) ){
+          this.regData.push( this.rowData[ c ] );
         }
       }
     }
